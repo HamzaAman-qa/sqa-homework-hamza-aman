@@ -4,15 +4,21 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:eval": "promptfoo eval -c promptfooconfig.yaml",
+    "test:all": "playwright test && npm run test:eval"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
+    "@anthropic-ai/sdk": "^0.123.0",
     "@playwright/test": "^1.62.1",
     "@types/node": "^26.4.1",
+    "deepeval": "^0.9.14",
+    "promptfoo": "^0.122.2",
     "typescript": "^7.0.2"
   }
 }
