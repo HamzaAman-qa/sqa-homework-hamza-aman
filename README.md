@@ -2,9 +2,9 @@
 
 Automated test suite and architecture validation for https://ask.permission.ai.
 
-## Setup & Execution
+## Setup
 
-Verify from clean clone in ~2 minutes:
+Install and run from a clean clone in under 4 minutes:
 
 ```bash
 # 1. Install dependencies
