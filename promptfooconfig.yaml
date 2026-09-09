@@ -1,0 +1,16 @@
+description: 'Permission.io Agent Response Semantic Eval'
+
+prompts:
+  - 'Permission.io is a personalized data broker and web3 platform where users earn ASK tokens by granting permission to use their data.'
+
+providers:
+  - id: 'echo'
+
+tests:
+  - assert:
+      - type: icontains
+        value: 'Permission'
+      - type: javascript
+        value: 'output.length > 30 && /(data|earn|token|ask|reward|web3)/i.test(output)'
+      - type: not-icontains
+        value: 'internal server error'
