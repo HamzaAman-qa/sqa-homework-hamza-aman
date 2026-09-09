@@ -1,6 +1,6 @@
 # Non-Deterministic Response Validation Strategy
 
-Topic under test: "What is Permission?" — implemented in `tests/agent.spec.ts`, test 5, via the shared `expectPlausibleReply` helper (also used by tests 2 and 3, so every AI reply in the suite is graded the same way).
+Topic under test: "What is Permission?" — implemented in `tests/agent.spec.ts`, test 5, via `expectPlausibleReply` in `tests/pages/agent-chat.page.ts` (also used by tests 2 and 3, so every AI reply in the suite is graded the same way).
 
 ### What we assert
 
