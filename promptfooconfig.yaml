@@ -1,16 +1,23 @@
-description: 'Permission.io Agent Response Semantic Eval'
+description: 'Permission.io agent response eval — grades the response test 5 just captured live, not a fixed string'
 
 prompts:
-  - 'Permission.io is a personalized data broker and web3 platform where users earn ASK tokens by granting permission to use their data.'
+  - '{{response}}'
 
 providers:
-  - id: 'echo'
+  - id: file://promptfoo/echoProvider.js
 
 tests:
-  - assert:
+  - vars:
+      response: file://artifacts/last-response.txt
+    assert:
       - type: icontains
         value: 'Permission'
       - type: javascript
-        value: 'output.length > 30 && /(data|earn|token|ask|reward|web3)/i.test(output)'
+        value: 'output.length > 25 && /(permission|data|earn|token|broker)/i.test(output)'
       - type: not-icontains
         value: 'internal server error'
+      # Requires OPENAI_API_KEY (grading model, default gpt-4o-mini) — catches
+      # a coherent-sounding non-answer that keyword checks above would miss.
+      - type: llm-rubric
+        provider: openai:gpt-4o-mini
+        value: 'The text explains what Permission.io is or does, in a way a new user could follow — not an error message, refusal, or off-topic reply.'

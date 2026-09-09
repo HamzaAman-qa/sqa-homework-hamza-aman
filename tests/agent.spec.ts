@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { mkdirSync, writeFileSync } from 'fs';
 
 test.describe('Permission.io AI Agent - Pre-Login Suite', () => {
 
@@ -16,8 +17,9 @@ test.describe('Permission.io AI Agent - Pre-Login Suite', () => {
     });
   });
 
+  // Excludes the static hero tagline (data-testid="ai-page-description") so `.last()` picks the newest chat bubble, not page chrome.
   const getAgentParagraphs = (page) => {
-    return page.locator('main p, div[class*="chat"] p, p:not([id*="ot-"]):not([class*="ot-"])').filter({
+    return page.locator('p:not([data-testid="ai-page-description"]):not([id*="ot-"]):not([class*="ot-"])').filter({
       hasNotText: /(Shift|Enter for new line|By using Permission|Terms of Use|Privacy Policy)/i
     });
   };
@@ -85,6 +87,11 @@ test.describe('Permission.io AI Agent - Pre-Login Suite', () => {
     expect(text.length).toBeGreaterThan(25);
     expect(text).toMatch(/(permission|data|earn|ask|token|broker)/i);
     expect(text).not.toMatch(/(internal server error|unauthorized|failed to fetch)/i);
+
+    // Capture the real response so `npm run test:eval` grades this run's
+    // actual output, not a fixed string.
+    mkdirSync('artifacts', { recursive: true });
+    writeFileSync('artifacts/last-response.txt', text, 'utf-8');
   });
 
   test('6. Empty or whitespace-only input cannot be dispatched', async ({ page }) => {

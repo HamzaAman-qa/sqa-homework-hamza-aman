@@ -1,17 +1,20 @@
 # Non-Deterministic Response Validation Strategy
 
-Validating LLM streaming responses requires decoupling semantic validity from literal string equality. Exact text assertions are anti-patterns in non-deterministic systems.
+Topic under test: "What is Permission?" — implemented in `tests/agent.spec.ts`, test 5.
 
-### What We Assert
-1. **Streaming Completion & Size Floor:** The message container must settle and exceed a character floor (`length > 25`). Empty or truncated bubbles fail immediately.
-2. **Domain Entity Heuristic (Regex):** For queries like *"What is Permission?"*, the response must match core business terms: `/(permission|data|broker|earn|ask|token)/i`.
-3. **Safety & Runtime Negation Checks:** We explicitly assert that error signatures do not appear: `/(internal server error|unauthorized|failed to fetch|undefined)/i`.
-4. **LLM Semantic Evaluation (Promptfoo):** Integrated via `promptfooconfig.yaml`. Promptfoo executes lightweight semantic assertions against the captured agent output, verifying intent and concept delivery rather than token ordering.
+### What we assert
 
-### What We Deliberately Do NOT Assert
-* **Exact String Matching:** Model temperature, system prompt updates, and dynamic formatting introduce variations that make strict text checks brittle.
-* **Stream Timing / Generation Latency:** Token latency varies based on server load and network jitter. Rigid timing assertions cause flaky CI runs.
-* **Layout / Bullet Order:** How the LLM structures paragraphs or bullet lists is variable and does not impact informational correctness.
+1. **Size floor**: `text.length > 25`. Catches empty bubbles and truncated streams.
+2. **Domain-keyword presence**: `/(permission|data|earn|ask|token|broker)/i`. The answer has to actually be about Permission.io, not a generic filler reply.
+3. **Error-signature negation**: response must not contain `internal server error`, `unauthorized`, or `failed to fetch` — catches a broken backend disguised as a "response."
+4. **LLM-graded rubric (Promptfoo)**: test 5 writes the captured text to `artifacts/last-response.txt`; `promptfooconfig.yaml` reads that file and re-runs the same three checks plus an `llm-rubric` assertion: *"explains what Permission.io is or does, in a way a new user could follow — not an error message, refusal, or off-topic reply."* Run it with `npm run test:eval` (needs `OPENAI_API_KEY`; grader is `gpt-4o-mini`).
 
-### Why Promptfoo?
-Plain regex confirms keyword presence but cannot verify semantic coherence. Promptfoo provides automated LLM grading to catch hallucinations where keywords exist in a grammatically broken or invalid context.
+### What we deliberately do NOT assert
+
+- **Exact text or word count** — the model rephrases every run; pinning a string makes the suite flaky by construction.
+- **Response latency** — depends on server load, not correctness.
+- **Paragraph/bullet structure** — the agent sometimes answers in one sentence, sometimes three; structure isn't the thing under test.
+
+### Why an LLM-rubric, not just regex
+
+The keyword regex would pass on a reply like *"Permission data data data,"* which is nonsense repeating matched words — plain assertions can't tell coherent from garbled. `llm-rubric` reads for actual meaning: does the text explain the product, or just contain the right words. That's the failure mode a plain assertion can't catch, and the reason this isn't inline-in-Playwright.

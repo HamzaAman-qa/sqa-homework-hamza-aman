@@ -16,7 +16,7 @@ npx playwright install chromium
 # 3. Run all 8 automated tests
 npm test
 
-# 4. (Optional) Run LLM response eval check
+# 4. (Optional) LLM-graded eval on the captured response — needs OPENAI_API_KEY
 npm run test:eval
 
 # 5. View test report
@@ -30,7 +30,7 @@ Skipped: post-login flows (automation stays pre-login per the brief), cross-brow
 
 ## Key decisions
 
-- **Locators**: `getByTestId` for the input and send button (`agent-chat-input`, `agent-chat-input-send-button`) — these survive copy/layout changes; only a `data-testid` rename breaks them, versus CSS classes which the site already changes between routes.
+- **Locators**: `getByTestId` for the input and send button; for chat replies, `p:not([data-testid="ai-page-description"])` — that attribute sits on the static hero tagline, which was silently winning `.last()` and got captured instead of the real reply until I traced the DOM and excluded it by testid instead of by CSS class, which the site already varies between routes.
 - **Waiting strategy**: no fixed sleeps or exact-text matches on the streamed response. I wait on `visible` + a length assertion (`/.{20,}/`), since the response text is different every run but its *presence and shape* aren't.
 - **Non-deterministic assertion (Part 2)**: structural checks (length, domain-keyword presence, absence of error strings) instead of exact-match or LLM-judge-only — see `artifacts/assertions.md`.
 - **OneTrust handling**: the cookie banner intercepts clicks intermittently; `beforeEach` accepts it if present and removes the DOM node, rather than adding retries to every test.
