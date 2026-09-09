@@ -4,22 +4,26 @@ Automated test suite and architecture validation for https://ask.permission.ai.
 
 ## Setup
 
-Install and run from a clean clone in under 4 minutes:
+Full end-to-end flow, clone to report — verified in 99s from a real public clone:
 
 ```bash
-# 1. Install dependencies
+# 1. Clone the repo and enter it
+git clone https://github.com/HamzaAman-qa/sqa-homework-hamza-aman.git
+cd sqa-homework-hamza-aman
+
+# 2. Install dependencies
 npm install
 
-# 2. Install Chromium browser binary
+# 3. Install Chromium browser binary
 npx playwright install chromium
 
-# 3. Run all 8 automated tests
+# 4. Run all 8 automated tests
 npm test
 
-# 4. (Optional) LLM-graded eval on the captured response — needs OPENAI_API_KEY
+# 5. (Optional) LLM-graded eval on the captured response — needs OPENAI_API_KEY
 npm run test:eval
 
-# 5. View test report
+# 6. View test report
 npx playwright show-report artifacts/report
 ```
 
@@ -45,7 +49,7 @@ See `artifacts/ai-workflow.md` for tools used, what was AI-drafted vs. hand-buil
 
 ## Next steps
 
-With 1–2 more days: add a GitHub Actions workflow gating merges on this suite, a second eval assertion (tone/refusal detection) in Promptfoo, and a small post-login smoke check once auth automation is in scope.
+With 1–2 more days: a GitHub Actions workflow gating merges on this suite, a second Promptfoo eval assertion (tone/refusal detection), and a post-login smoke check once auth automation is in scope.
 
 ## Submission checklist
 
