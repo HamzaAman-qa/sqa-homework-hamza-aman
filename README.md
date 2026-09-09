@@ -30,12 +30,14 @@ Skipped: post-login flows (automation stays pre-login per the brief), cross-brow
 
 ## Key decisions
 
-- **Locators**: `getByTestId` for the input and send button; for chat replies, `p:not([data-testid="ai-page-description"])` — that attribute sits on the static hero tagline, which was silently winning `.last()` and got captured instead of the real reply until I traced the DOM and excluded it by testid instead of by CSS class, which the site already varies between routes.
-- **Waiting strategy**: no fixed sleeps or exact-text matches on the streamed response. I wait on `visible` + a length assertion (`/.{20,}/`), since the response text is different every run but its *presence and shape* aren't.
+- **Locators**: `getByTestId` for the input/send button; for replies, `p:not([data-testid="ai-page-description"])` — that testid sits on the static hero tagline, which was silently winning `.last()` over the real reply until traced and excluded by testid, not a fragile CSS class.
+- **Waiting strategy**: no fixed sleeps or exact-text matches. Two real races showed up under repeated runs: the site's own greeting streams in and sometimes settles *after* a test starts (`beforeEach` polls the last message until it stops changing), and "a reply is visible" is trivially true of the old greeting before a new one renders (`waitForNewReply` polls the **message count** past its pre-send baseline instead).
 - **Non-deterministic assertion (Part 2)**: structural checks (length, domain-keyword presence, absence of error strings) instead of exact-match or LLM-judge-only — see `artifacts/assertions.md`.
 - **OneTrust handling**: the cookie banner intercepts clicks intermittently; `beforeEach` accepts it if present and removes the DOM node, rather than adding retries to every test.
 - **Eval framework**: Promptfoo wired in as a separate `npm run test:eval` step rather than inline in Playwright, so a flaky LLM judge can't block the core suite.
 - **Test count (8, not fewer)**: included empty-input and mobile-viewport checks because they're real interaction edge cases users hit, not padding.
+- **No exact-phrase assertions**: test 3 originally asserted a near-exact phrase ("ASK is the native token") — exactly the flaky trap the brief warns about. Rewrote it to share `expectPlausibleReply` with tests 2 and 5: length + keyword-family regex + error-signature negation, never the literal wording.
+- **Suggested-topic pills**: inconsistent across runs — several fresh, cache-cleared contexts rendered none, others rendered some. Test 1 logs the pill-candidate count instead of hard-failing on a site behavior I don't control, and test 2 falls back to typing a question when none is clickable, so it still tests the click-to-response path whenever pills do appear.
 
 ## AI disclosure
 

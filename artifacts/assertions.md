@@ -1,10 +1,10 @@
 # Non-Deterministic Response Validation Strategy
 
-Topic under test: "What is Permission?" — implemented in `tests/agent.spec.ts`, test 5.
+Topic under test: "What is Permission?" — implemented in `tests/agent.spec.ts`, test 5, via the shared `expectPlausibleReply` helper (also used by tests 2 and 3, so every AI reply in the suite is graded the same way).
 
 ### What we assert
 
-1. **Size floor**: `text.length > 25`. Catches empty bubbles and truncated streams.
+1. **Size floor**: `text.length > 20`. Catches empty bubbles and truncated streams.
 2. **Domain-keyword presence**: `/(permission|data|earn|ask|token|broker)/i`. The answer has to actually be about Permission.io, not a generic filler reply.
 3. **Error-signature negation**: response must not contain `internal server error`, `unauthorized`, or `failed to fetch` — catches a broken backend disguised as a "response."
 4. **LLM-graded rubric (Promptfoo)**: test 5 writes the captured text to `artifacts/last-response.txt`; `promptfooconfig.yaml` reads that file and re-runs the same three checks plus an `llm-rubric` assertion: *"explains what Permission.io is or does, in a way a new user could follow — not an error message, refusal, or off-topic reply."* Run it with `npm run test:eval` (needs `OPENAI_API_KEY`; grader is `gpt-4o-mini`).
